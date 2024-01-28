@@ -12,6 +12,7 @@ blueprint:
           min: 0.0
           max: 1.0
           step: 0.01
+      default: 0.6
     coeff_t:
       name: Coefficient T
       description: coefficient multiplicateur de la différence entre la consigne et la température extérieure pour le calcul de la puissance (0.01 conseillé)
@@ -20,9 +21,34 @@ blueprint:
           min: 0.0
           max: 0.1
           step: 0.001
-    entity_consigne:
+      default: 0.01
+    entity_presence:
+      name: Presence
+      description: Champ d'entrée de la présence dans le logement
+      selector:
+        entity:
+          domain: select
+    entity_mode:
+      name: Mode chauffage
+      description: Champ d'entrée du mode du chauffage
+      selector:
+        entity:
+          domain: select
+    entity_consigne_tt:
       name: Consigne
-      description: Champ d'entrée de la température de consigne (input number).
+      description: Champ d'entrée de la température de consigne télétravail (input number).
+      selector:
+        entity:
+          domain: input_number
+    entity_consigne_vacances:
+      name: Consigne
+      description: Champ d'entrée de la température de consigne télétravail (input number).
+      selector:
+        entity:
+          domain: input_number
+    entity_consigne_manuelle:
+      name: Consigne
+      description: Champ d'entrée de la température de consigne manuelle (input number).
       selector:
         entity:
           domain: input_number
@@ -40,85 +66,153 @@ blueprint:
         entity:
           domain: sensor
           device_class: temperature
-    entity_fenetre:
-      name: Fenêtre
-      description: Capteur d'ouverture de fenêtre (sensor)
-      selector:
-        entity:
-          domain: binary_sensor
-          device_class: opening
     entity_puissance:
       name: Puissance
       description: Champ d'affichage de la puissance (input_number)
       selector:
         entity:
           domain: input_number
-    entity_chauffage:
-      name: Chauffage
-      description: Interrupteur marche / arrêt du chauffage (switch)
+    entity_consigne:
+      name: Consigne
+      description: Champ d'affichage de la consigne de température (input_number)
       selector:
         entity:
-          domain: switch
+          domain: input_number
+    entity_chauffage:
+      name: Chauffage
+      description: Switch mode du chauffage (selector)
+      selector:
+        entity:
+          domain: selector
 
 # Récupération des paramètres
 variables:
   coeff_c: !input coeff_c
   coeff_t: !input coeff_t
-  entity_temp_int: !input entity_temp_int
-  entity_temp_ext: !input entity_temp_ext
-  entity_fenetre: !input entity_fenetre
+  temp_int: !input entity_temp_int
+  temp_ext: !input entity_temp_ext
+  mode: !input entity_mode
+  consigne_tt: !input entity_consigne_tt
+  consigne_vacances: !input entity_consigne_vacances
+  consigne_manuelle: !input entity_consigne_manuelle
 
 trigger:
   - platform: time_pattern
     minutes: "/10"
   - platform: state
-    entity_id: !input entity_consigne
+    entity_id: !input entity_presence
   - platform: state
-    entity_id: !input entity_fenetre
+    entity_id: !input entity_mode
+  - platform: state
+    entity_id: !input entity_consigne_tt
+  - platform: state
+    entity_id: !input entity_consigne_vacances
+  - platform: state
+    entity_id: !input entity_consigne_manuelle
+
 
 
 action:
-  - alias: récupération des données
+  - alias: calcul puissances et valeurs
     variables:
-      entity_consigne: !input entity_consigne
-      consigne: "{{states(entity_consigne)}}"
-      temp_ext: '{{ states(entity_temp_ext) }}'
-      temp_int: '{{ states(entity_temp_int) }}'
-      fenetre: '{{states(entity_fenetre)}}'     
-      puissance: >-
-        {%set val = coeff_c * (consigne - temp_int) + coeff_t * (consigne -
-        temp_ext) %}  {% if val > 1 and fenetre == 'off' %} {% set val = 100 %}  {% elif val < 0 or
-        fenetre == 'on' %} {% set val = 0 %}  {% else %} {% set val = ( (val *
+      presence: "{{states(presence)}}"
+      mode: "{{states(mode)}}"
+      consigne_tt: "{{states(consigne_tt)}}"
+      consigne_vacances: "{{states(consigne_vacances)}}"
+      consigne_vacances: "{{states(consigne_manuelle)}}"
+      temp_ext: '{{ states(temp_ext) }}'
+      temp_int: '{{ states(temp_int) }}'
+      puissance_tt: >-
+        {%set val = coeff_c * (consigne_tt - temp_int) + coeff_t * (consigne_tt -
+        temp_ext) %}  
+        {% if val > 1 %} {% set val = 100 %} 
+        {% elif val < 0 %} {% set val = 0 %}  
+        {% else %} {% set val = ( (val *
         100) | round(0)) %} {% endif %} {{val}}
-      temps_chauffe: '{{ puissance * 6 }}'
-  - alias: Met à jour l'indicateur de puissance
-    service: input_number.set_value
-    target:
-      entity_id: !input entity_puissance
-    data:
-      value: '{{puissance}}'  
+      temps_chauffe_tt: '{{ puissance_tt * 6 }}'
+      puissance_vacances: >-
+        {%set val = coeff_c * (consigne_vacances - temp_int) + coeff_t * (consigne_vacances -
+        temp_ext) %}  
+        {% if val > 1 %} {% set val = 100 %} 
+        {% elif val < 0 %} {% set val = 0 %}  
+        {% else %} {% set val = ( (val *
+        100) | round(0)) %} {% endif %} {{val}}
+      temps_chauffe_vacances: '{{ puissance_vacances * 6 }}'
+      puissance_manuelle: >-
+        {%set val = coeff_c * (consigne_manuelle - temp_int) + coeff_t * (consigne_manuelle -
+        temp_ext) %}  
+        {% if val > 1 %} {% set val = 100 %} 
+        {% elif val < 0 %} {% set val = 0 %}  
+        {% else %} {% set val = ( (val *
+        100) | round(0)) %} {% endif %} {{val}}
+      temps_chauffe_manuelle: '{{ puissance_manuelle * 6 }}'
+      temps_chauffe: >-
+        {% if mode == "Manuel" %} {% set val = temps_chauffe_manuelle %} 
+        {% elif presence == "Télétravail" %} {% set val = temps_chauffe_tt %} 
+        {% elif presence == "Vacances" %} {% set val = temps_chauffe_vacances %}  
+        {% else %} {% set val = 0 %} {% endif %} {{val}}
+      puissance: >-
+        {% if mode == "Manuel" %} {% set val = puissance_manuelle %} 
+        {% elif presence == "Télétravail" %} {% set val = puissance_tt %} 
+        {% elif presence == "Vacances" %} {% set val = puissance_vacances %}  
+        {% else %} {% set val = 0 %} {% endif %} {{val}}
   - choose:
       - conditions:
           - condition: template
-            value_template: '{{puissance == 0}}'
+            value_template: '{{mode == "Confort"}}'
         sequence:
-          - service: switch.turn_off
+          - service: select.select_option
             target:
               entity_id: !input entity_chauffage
+            data:
+              option: comfort
+      - conditions:
+          - condition: template
+            value_template: '{{mode == "Eco"}}'
+        sequence:
+          - service: select.select_option
+            target:
+              entity_id: !input entity_chauffage
+            data:
+              option: eco
+      - conditions:
+          - condition: template
+            value_template: '{{mode == "Hors gel"}}'
+        sequence:
+          - service: select.select_option
+            target:
+              entity_id: !input entity_chauffage
+            data:
+              option: frost_protection
+      - conditions:
+          - condition: template
+            value_template: '{{ puissance == 0}}'
+        sequence:
+          - service: select.select_option
+            target:
+              entity_id: !input entity_chauffage
+            data:
+              option: frost_protection
       - conditions:
           - condition: template
             value_template: '{{ puissance > 99}}'
         sequence:
-          - service: switch.turn_on
+          - service: select.select_option
             target:
               entity_id: !input entity_chauffage
+            data:
+              option: comfort
     default:
-      - service: switch.turn_on
+      - service: select.select_option
         target:
           entity_id: !input entity_chauffage
+        data:
+          option: comfort
       - delay: '{{temps_chauffe}}'
-      - service: switch.turn_off
+      - service: select.select_option
         target:
           entity_id: !input entity_chauffage
+        data:
+          option: frost_protection
 mode: restart
  
