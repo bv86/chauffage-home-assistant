@@ -110,11 +110,11 @@ action:
     variables:
       presence: "{{ states(entity_presence) }}"
       mode: "{{ states(entity_mode) }}"
-      consigne_tt: {{ states(entity_consigne_tt) }}
-      consigne_vacances: {{ states(entity_consigne_vacances) }}
-      consigne_manuelle: {{ states(entity_consigne_manuelle) }}
-      temp_ext: 12.0
-      temp_int: {{ states(entity_temp_int) }}
+      consigne_tt: "{{ states(entity_consigne_tt) }}"
+      consigne_vacances: "{{ states(entity_consigne_vacances) }}"
+      consigne_manuelle: "{{ states(entity_consigne_manuelle) }}"
+      temp_ext: "{{ state_attr('weather.forecast_maison', 'temperature') }}"
+      temp_int: '{{ states(entity_temp_int) }}'
       puissance_tt: >-
         {%set val = coeff_c * (consigne_tt - temp_int) + coeff_t * (consigne_tt - temp_ext) %}  
         {% if val > 1 %} {% set val = 100 %} 
@@ -145,7 +145,24 @@ action:
         {% if mode == "Manuel" %} {% set val = puissance_manuelle %} 
         {% elif presence == "Télétravail" %} {% set val = puissance_tt %} 
         {% elif presence == "Vacances" %} {% set val = puissance_vacances %}  
-        {% else %} {% set val = 0 %} {% endif %} {{val}}
+        {% else %} {% set val = -1 %} {% endif %} {{val}}
+      consigne: >-
+        {% if mode == "Manuel" %} {% set val = consigne_manuelle %} 
+        {% elif presence == "Télétravail" %} {% set val = consigne_tt %} 
+        {% elif presence == "Vacances" %} {% set val = consigne_vacances %}  
+        {% else %} {% set val = -1 %} {% endif %} {{val}}
+  - alias: Met à jour la puisance cible
+    service: input_number.set_value
+    target:
+      entity_id: !input entity_puissance
+    data:
+      value: {{ puissance }}
+  - alias: Met à jour la température cible
+    service: input_number.set_value
+    target:
+      entity_id: !input entity_consigne
+    data:
+      value: {{ consigne }}
   - choose:
       - conditions:
           - condition: template
