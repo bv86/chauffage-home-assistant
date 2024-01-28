@@ -110,11 +110,11 @@ action:
     variables:
       presence: "{{ states(entity_presence) }}"
       mode: "{{ states(entity_mode) }}"
-      consigne_tt: "{{ states(entity_consigne_tt) }}"
-      consigne_vacances: "{{ states(entity_consigne_vacances) }}"
-      consigne_manuelle: "{{ states(entity_consigne_manuelle) }}"
-      temp_ext: "{{ states('weather.temperature') | float }}"
-      temp_int: '{{ states(entity_temp_int) }}'
+      consigne_tt: {{ states(entity_consigne_tt) }}
+      consigne_vacances: {{ states(entity_consigne_vacances) }}
+      consigne_manuelle: {{ states(entity_consigne_manuelle) }}
+      temp_ext: 12.0
+      temp_int: {{ states(entity_temp_int) }}
       puissance_tt: >-
         {%set val = coeff_c * (consigne_tt - temp_int) + coeff_t * (consigne_tt - temp_ext) %}  
         {% if val > 1 %} {% set val = 100 %} 
