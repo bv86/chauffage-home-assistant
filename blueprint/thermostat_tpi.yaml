@@ -73,7 +73,7 @@ blueprint:
           domain: input_number
     entity_chauffage:
       name: Chauffage
-      description: Switch mode du chauffage (selector)
+      description: Entité de contrôle du mode de chauffage (select)
       selector:
         entity:
           domain: select
@@ -84,6 +84,7 @@ variables:
   coeff_t: !input coeff_t
   temp_int: !input entity_temp_int
   mode: !input entity_mode
+  presence: !input entity_presence
   consigne_tt: !input entity_consigne_tt
   consigne_vacances: !input entity_consigne_vacances
   consigne_manuelle: !input entity_consigne_manuelle
