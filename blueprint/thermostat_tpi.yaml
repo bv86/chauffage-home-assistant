@@ -76,7 +76,7 @@ blueprint:
       description: Switch mode du chauffage (selector)
       selector:
         entity:
-          domain: selector
+          domain: select
 
 # Récupération des paramètres
 variables:
