@@ -23,7 +23,7 @@ blueprint:
           step: 0.001
       default: 0.01
     entity_presence:
-      name: Presence
+      name: Présence
       description: Champ d'entrée de la présence dans le logement
       selector:
         entity:
@@ -60,13 +60,13 @@ blueprint:
           domain: sensor
           device_class: temperature
     entity_puissance:
-      name: Puissance
+      name: Puissance cible
       description: Champ d'affichage de la puissance (input_number)
       selector:
         entity:
           domain: input_number
     entity_consigne:
-      name: Consigne
+      name: Consigne cible
       description: Champ d'affichage de la consigne de température (input_number)
       selector:
         entity:
@@ -110,11 +110,11 @@ action:
     variables:
       presence: "{{ states(entity_presence) }}"
       mode: "{{ states(entity_mode) }}"
-      consigne_tt: "{{ states(entity_consigne_tt) }}"
-      consigne_vacances: "{{ states(entity_consigne_vacances) }}"
-      consigne_manuelle: "{{ states(entity_consigne_manuelle) }}"
-      temp_ext: "{{ state_attr('weather.forecast_maison', 'temperature') }}"
-      temp_int: '{{ states(entity_temp_int) }}'
+      consigne_tt: {{ states(entity_consigne_tt) }}
+      consigne_vacances: {{ states(entity_consigne_vacances) }}
+      consigne_manuelle: {{ states(entity_consigne_manuelle) }}
+      temp_ext: {{ state_attr('weather.forecast_maison', 'temperature') }}
+      temp_int: {{ states(entity_temp_int) }}
       puissance_tt: >-
         {%set val = coeff_c * (consigne_tt - temp_int) + coeff_t * (consigne_tt - temp_ext) %}  
         {% if val > 1 %} {% set val = 100 %} 
