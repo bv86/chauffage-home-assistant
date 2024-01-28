@@ -52,13 +52,6 @@ blueprint:
       selector:
         entity:
           domain: input_number
-    entity_temp_ext:
-      name: Température extérieure
-      description: Sonde de mesure de la température extérieure (sensor)
-      selector:
-        entity:
-          domain: sensor
-          device_class: temperature
     entity_temp_int:
       name: Température intérieure
       description: Sonde de mesure de la température intérieure (sensor)
@@ -90,7 +83,6 @@ variables:
   coeff_c: !input coeff_c
   coeff_t: !input coeff_t
   temp_int: !input entity_temp_int
-  temp_ext: !input entity_temp_ext
   mode: !input entity_mode
   consigne_tt: !input entity_consigne_tt
   consigne_vacances: !input entity_consigne_vacances
@@ -120,7 +112,7 @@ action:
       consigne_tt: "{{states(consigne_tt)}}"
       consigne_vacances: "{{states(consigne_vacances)}}"
       consigne_vacances: "{{states(consigne_manuelle)}}"
-      temp_ext: '{{ states(temp_ext) }}'
+      temp_ext: "{{ states('weather.temperature')}}"
       temp_int: '{{ states(temp_int) }}'
       puissance_tt: >-
         {%set val = coeff_c * (consigne_tt - temp_int) + coeff_t * (consigne_tt -
