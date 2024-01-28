@@ -112,28 +112,25 @@ action:
       mode: "{{states(mode)}}"
       consigne_tt: "{{states(consigne_tt)}}"
       consigne_vacances: "{{states(consigne_vacances)}}"
-      consigne_vacances: "{{states(consigne_manuelle)}}"
+      consigne_manuelle: "{{states(consigne_manuelle)}}"
       temp_ext: "{{ states('weather.temperature')}}"
       temp_int: '{{ states(temp_int) }}'
       puissance_tt: >-
-        {%set val = coeff_c * (consigne_tt - temp_int) + coeff_t * (consigne_tt -
-        temp_ext) %}  
+        {%set val = coeff_c * (consigne_tt - temp_int) + coeff_t * (consigne_tt - temp_ext) %}  
         {% if val > 1 %} {% set val = 100 %} 
         {% elif val < 0 %} {% set val = 0 %}  
         {% else %} {% set val = ( (val *
         100) | round(0)) %} {% endif %} {{val}}
       temps_chauffe_tt: '{{ puissance_tt * 6 }}'
       puissance_vacances: >-
-        {%set val = coeff_c * (consigne_vacances - temp_int) + coeff_t * (consigne_vacances -
-        temp_ext) %}  
+        {%set val = coeff_c * (consigne_vacances - temp_int) + coeff_t * (consigne_vacances - temp_ext) %}  
         {% if val > 1 %} {% set val = 100 %} 
         {% elif val < 0 %} {% set val = 0 %}  
         {% else %} {% set val = ( (val *
         100) | round(0)) %} {% endif %} {{val}}
       temps_chauffe_vacances: '{{ puissance_vacances * 6 }}'
       puissance_manuelle: >-
-        {%set val = coeff_c * (consigne_manuelle - temp_int) + coeff_t * (consigne_manuelle -
-        temp_ext) %}  
+        {%set val = coeff_c * (consigne_manuelle - temp_int) + coeff_t * (consigne_manuelle - temp_ext) %}  
         {% if val > 1 %} {% set val = 100 %} 
         {% elif val < 0 %} {% set val = 0 %}  
         {% else %} {% set val = ( (val *
