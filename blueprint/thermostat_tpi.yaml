@@ -156,13 +156,13 @@ action:
     target:
       entity_id: !input entity_puissance
     data:
-      value: {{ puissance }}
+      value: '{{ puissance }}'
   - alias: Met à jour la température cible
     service: input_number.set_value
     target:
       entity_id: !input entity_consigne
     data:
-      value: {{ consigne }}
+      value: '{{ consigne }}'
   - choose:
       - conditions:
           - condition: template
