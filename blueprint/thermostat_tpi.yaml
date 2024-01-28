@@ -35,19 +35,19 @@ blueprint:
         entity:
           domain: input_select
     entity_consigne_tt:
-      name: Consigne
+      name: Consigne Télétravail
       description: Champ d'entrée de la température de consigne télétravail (input number).
       selector:
         entity:
           domain: input_number
     entity_consigne_vacances:
-      name: Consigne
-      description: Champ d'entrée de la température de consigne télétravail (input number).
+      name: Consigne Vacances
+      description: Champ d'entrée de la température de consigne vacances (input number).
       selector:
         entity:
           domain: input_number
     entity_consigne_manuelle:
-      name: Consigne
+      name: Consigne Manuelle
       description: Champ d'entrée de la température de consigne manuelle (input number).
       selector:
         entity:
