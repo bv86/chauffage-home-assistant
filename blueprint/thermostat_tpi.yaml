@@ -27,13 +27,13 @@ blueprint:
       description: Champ d'entrée de la présence dans le logement
       selector:
         entity:
-          domain: select
+          domain: input_select
     entity_mode:
       name: Mode chauffage
       description: Champ d'entrée du mode du chauffage
       selector:
         entity:
-          domain: select
+          domain: input_select
     entity_consigne_tt:
       name: Consigne
       description: Champ d'entrée de la température de consigne télétravail (input number).
