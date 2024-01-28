@@ -108,12 +108,12 @@ trigger:
 action:
   - alias: calcul puissances et valeurs
     variables:
-      presence: "{{states(entity_presence)}}"
-      mode: "{{states(entity_mode)}}"
-      consigne_tt: "{{states(entity_consigne_tt)}}"
-      consigne_vacances: "{{states(entity_consigne_vacances)}}"
-      consigne_manuelle: "{{states(entity_consigne_manuelle)}}"
-      temp_ext: "{{ states('weather.temperature')}}"
+      presence: "{{ states(entity_presence) }}"
+      mode: "{{ states(entity_mode) }}"
+      consigne_tt: "{{ states(entity_consigne_tt) }}"
+      consigne_vacances: "{{ states(entity_consigne_vacances) }}"
+      consigne_manuelle: "{{ states(entity_consigne_manuelle) }}"
+      temp_ext: "{{ states('weather.temperature') | float }}"
       temp_int: '{{ states(entity_temp_int) }}'
       puissance_tt: >-
         {%set val = coeff_c * (consigne_tt - temp_int) + coeff_t * (consigne_tt - temp_ext) %}  
@@ -167,7 +167,7 @@ action:
               option: eco
       - conditions:
           - condition: template
-            value_template: '{{mode == "Hors gel"}}'
+            value_template: '{{ mode == "Hors gel" }}'
         sequence:
           - service: select.select_option
             target:
@@ -176,7 +176,7 @@ action:
               option: frost_protection
       - conditions:
           - condition: template
-            value_template: '{{ puissance == 0}}'
+            value_template: '{{ puissance == 0 }}'
         sequence:
           - service: select.select_option
             target:
@@ -185,7 +185,7 @@ action:
               option: frost_protection
       - conditions:
           - condition: template
-            value_template: '{{ puissance > 99}}'
+            value_template: '{{ puissance > 99 }}'
         sequence:
           - service: select.select_option
             target:
@@ -198,7 +198,7 @@ action:
           entity_id: !input entity_chauffage
         data:
           option: comfort
-      - delay: '{{temps_chauffe}}'
+      - delay: '{{ temps_chauffe }}'
       - service: select.select_option
         target:
           entity_id: !input entity_chauffage
